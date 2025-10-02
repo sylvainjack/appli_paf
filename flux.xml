@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="https://eduline.ac-lille.fr/sofia-fmo-acad//public/api/individualtrainingplanxslt/"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sofiafmo="https://eduline.ac-lille.fr/sofia-fmo-acad//public/api/sofiafmorssns/" version="2.0">
+  <channel>
+    <language>fr-FR</language>
+    <pubDate>Sun, 28 Sep 2025 06:36:39 +0200</pubDate>
+    <lastBuildDate>Sun, 28 Sep 2025 06:36:39 +0200</lastBuildDate>
+    <docs>https://cyber.harvard.edu/tech/rss</docs>
+    <skipHours>
+      <hour>0</hour>
+      <hour>1</hour>
+      <hour>2</hour>
+      <hour>3</hour>
+      <hour>4</hour>
+      <hour>5</hour>
+      <hour>6</hour>
+      <hour>7</hour>
+    </skipHours>
+    <title>Accès au flux RSS impossible.</title>
+    <link>http://docker-app1.in.ac-lille.fr:8081/sofia-fmo-acad/public/api/individualtrainingplan/apiFeedId/18/token/XXX/format/rss/</link>
+    <atom:link href="http://docker-app1.in.ac-lille.fr:8081/sofia-fmo-acad/public/api/individualtrainingplan/apiFeedId/18/token/XXX/format/rss/" rel="self" type="application/rss+xml"/>
+    <description>Token incorrect</description>
+  </channel>
+</rss>
