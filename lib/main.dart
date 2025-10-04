@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'Model/data_provider.dart'; // ton provider
 import 'View/home.dart'; // ton écran Home
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+  setUrlStrategy(null);
   runApp(
     ChangeNotifierProvider(create: (_) => DataProvider(), child: const MyApp()),
   );
@@ -24,10 +25,6 @@ class MyApp extends StatelessWidget {
         if (!provider.isInitialized) {
           //   // Lancement de l'init si pas encore démarrée
           provider.startInitialization();
-
-          //   return const MaterialApp(
-          //     home: Scaffold(body: Center(child: CircularProgressIndicator())),
-          //   );
         }
 
         // Une fois initialisé, on peut lancer l'app
@@ -38,7 +35,7 @@ class MyApp extends StatelessWidget {
           initialRoute: Home.id,
           routes: {
             Home.id: (context) => const Home(),
-            Themes.id: (context) => const Themes(),
+            //  Themes.id: (context) => const Themes(),
             FormationsParTheme.id: (context) => const FormationsParTheme(),
           },
         );

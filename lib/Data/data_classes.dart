@@ -123,6 +123,16 @@ class Module {
     required this.tags,
     // required this.groupes,
   });
+  // String get fullText =>
+  //     "$titre $objectifs $contenu $public $discipline".toLowerCase();
+  String get fullTextPrincipal {
+    return "$theme $titre $public".toLowerCase();
+  }
+
+  // Texte secondaire (moins fort)
+  String get fullTextSecondaire {
+    return "$objectifs $contenu".toLowerCase();
+  }
 
   Map<String, dynamic> toJson() {
     return {

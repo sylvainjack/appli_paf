@@ -40,8 +40,11 @@ dependencies:
   provider: ^6.1.5+1
   url_launcher: ^6.3.0
   dart_appwrite: ^18.1.0
+  web: ^1.0.0
   flutter_localizations:
     sdk: flutter
+  go_router: ^16.2.4
+  diacritic: ^0.1.6
 
 dev_dependencies:
   flutter_test:
@@ -66,17 +69,7 @@ flutter:
   uses-material-design: true
  
   assets:
-    - assets/images/8830.jpg
-    - assets/images/2148911822.jpg
-    - assets/images/fondblanc.jpg
-    - assets/images/3928.jpg
-    - assets/images/fondJaune.jpg
-    - assets/images/accueil.jpg
-    - assets/images/fond.jpg
-    - assets/images/eafc.png
-    - assets/images/acad.png
-    - assets/images/fonddispo.jpg
-    - assets/images/fonddispo2.jpg
+    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

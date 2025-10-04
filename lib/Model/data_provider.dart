@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'dart:math';
+import 'package:diacritic/diacritic.dart';
 import 'package:appli_paf/Data/constantes.dart';
 import 'package:appli_paf/Data/data_classes.dart';
 import 'package:dart_appwrite/dart_appwrite.dart';
@@ -14,10 +16,12 @@ String databaseId = '68d93af100092904c136';
 class DataProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool _initializationStarted = false;
+  bool isSearching = false;
   bool get isInitialized => _isInitialized;
   late Client client;
   late TablesDB tablesDB;
-
+  Set<Module> _aLaUne = {};
+  List<Module> get aLaUne => _aLaUne.toList();
   List<Module> _modules = [];
   List<Session> _sessions = [];
   List<Module> get modules => _modules;
@@ -32,9 +36,15 @@ class DataProvider extends ChangeNotifier {
   String get selectedTheme => _selectedTheme;
   List<String> get themesDisc => _themesDisc.toList();
   List<String> get themesTransv => _themesTransv.toList();
+  List<Module> _resultatRecherche = [];
+  List<Module> get resultatRecherche => _resultatRecherche;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  List<Module> _resultatPrincipal = [];
+  List<Module> _resultatSecondaire = [];
 
+  List<Module> get resultatPrincipal => _resultatPrincipal;
+  List<Module> get resultatSecondaire => _resultatSecondaire;
   String? _error;
   String? get error => _error;
 
@@ -74,15 +84,32 @@ class DataProvider extends ChangeNotifier {
       _modules.forEach((module) {
         if (module.discipline == true) {
           _themesDisc.add(module.theme);
-        } else {
-          _themesTransv.add(module.theme);
         }
+        // else {
+        //   _themesTransv.add(module.theme);
+        // }
         _dispoSet.add(module.dispoCode);
       });
       _dispoSet.forEach((dispoCode) {
         _dispoList.add(Dispo(code: dispoCode, modules: []));
       });
-
+      _themesTransv = {
+        "L'école et le monde de l'entreprise",
+        "Le numérique éducatif",
+        "L'inclusion scolaire",
+        "L'intelligence artificielle",
+        "Sécurité et secourisme",
+        "L'orientation des élèves",
+        "Culture scientifique",
+        "Action culturelle",
+        "Les valeurs de la République",
+        "Education au média et à l'information",
+        "Scolarisation des allophones",
+        "Les compétences psychosociales",
+        "L'innovation et la recherche",
+        "Lutter contre les discriminations",
+      };
+      print("Theme n°1 : ${themesTransv[0]}");
       _dispoList.forEach((dispo) {
         _modules.forEach((module) {
           module.dispoCode == dispo.code ? dispo.modules.add(module) : null;
@@ -91,6 +118,19 @@ class DataProvider extends ChangeNotifier {
 
       print('taille de themeDisc :${_themesDisc.length}');
       print('taille de themeTransv :${_themesTransv.length}');
+      remplirALaUne();
+    }
+  }
+
+  void remplirALaUne() {
+    final random = Random();
+
+    if (_modules.isNotEmpty) {
+      // Mélanger la liste pour l’aléatoire
+      final shuffled = List<Module>.from(_modules)..shuffle(random);
+
+      // Prendre les 9 premiers et les ajouter au set
+      _aLaUne = shuffled.take(8).toSet();
     }
   }
 
@@ -239,4 +279,286 @@ class DataProvider extends ChangeNotifier {
       return null;
     }
   }
+
+  // void rechercheFormations(String recherche) {
+  //   print(recherche);
+
+  //   final keywords = recherche
+  //       .toLowerCase()
+  //       .split('/')
+  //       .map((k) => k.trim())
+  //       .where((k) => k.isNotEmpty)
+  //       .toList();
+  //   _resultatRecherche = modules.where((m) {
+  //     return keywords.every((k) => m.fullText.contains(k));
+  //   }).toList();
+  // Filtrer les modules qui contiennent au moins un mot clé
+  // _resultatRecherche = modules.where((m) {
+  //   return keywords.any((k) => m.fullText.contains(k));
+  // }).toList();
+
+  // // Option : trier par pertinence (nombre de mots trouvés)
+  // _resultatRecherche.sort((a, b) {
+  //   int scoreA = keywords.where((k) => a.fullText.contains(k)).length;
+  //   int scoreB = keywords.where((k) => b.fullText.contains(k)).length;
+  //   return scoreB.compareTo(scoreA);
+  // });
+
+  // _resultatRecherche = {
+  //   Module(
+  //     code: "111111",
+  //     plan: "plan",
+  //     theme: "ANGLAIS",
+  //     titre: "titre",
+  //     dispoCode: "dispoCode",
+  //     dispoTitre: "dispoTitre",
+  //     public: "public",
+  //     objectifs: "objectifs",
+  //     contenu: "contenu",
+  //     duree: "duree",
+  //     effectif: "effectif",
+  //     abonnement: "abonnement",
+  //     discipline: true,
+  //     tags: [],
+  //   ),
+  // };
+  //   notifyListeners();
+  // }
+
+  // void rechercheFormations(String recherche) {
+  //   print("Recherche : $recherche");
+
+  //   // Normaliser et découper la recherche en mots-clés
+  //   final keywords = recherche
+  //       .toLowerCase()
+  //       .split('/')
+  //       .map((k) => removeDiacritics(k.trim()))
+  //       .where((k) => k.isNotEmpty)
+  //       .toList();
+
+  //   print("Mots-clés : $keywords");
+
+  //   _resultatRecherche = modules.where((m) {
+  //     // Texte complet du module normalisé (minuscules + sans accents)
+  //     final fullText = removeDiacritics(m.fullText.toLowerCase());
+  //     // Vérifier que tous les mots-clés sont présents
+  //     return keywords.every((k) => fullText.contains(k));
+  //   }).toList();
+
+  //   print("Résultat : ${_resultatRecherche.length} modules trouvés");
+  //   notifyListeners();
+  // }
+
+  // Normaliser texte : minuscules, suppression accents, espaces multiples
+  String normalizeText(String s) {
+    return removeDiacritics(
+      s.toLowerCase(),
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  // Recherche par mots-clés
+  // void rechercheFormations(String query) {
+  //   // Découper par '/'
+  //   final rawKeywords = query.split('/');
+
+  //   final keywords = rawKeywords
+  //       .map((k) => normalizeText(k))
+  //       .where((k) => k.isNotEmpty)
+  //       .toList();
+
+  //   List<Module> results = [];
+
+  //   for (var m in modules) {
+  //     final fullText = normalizeText(m.fullText);
+
+  //     bool matches = true;
+
+  //     // Vérifier mots obligatoires (commencent par '+') et facultatifs
+  //     for (var k in keywords) {
+  //       if (k.startsWith('+')) {
+  //         String word = k.substring(1);
+  //         if (!fullText.contains(word)) {
+  //           matches = false;
+  //           break;
+  //         }
+  //       }
+  //     }
+
+  //     // Vérifier au moins un mot facultatif si aucun obligatoire n'est présent
+  //     bool hasOptional = keywords.any(
+  //       (k) => !k.startsWith('+') && fullText.contains(k),
+  //     );
+  //     if (!keywords.any((k) => k.startsWith('+')) && !hasOptional) {
+  //       matches = false;
+  //     }
+
+  //     if (matches) {
+  //       results.add(m);
+  //     }
+  //   }
+
+  //   // Trier par nombre de mots trouvés pour pertinence
+  //   results.sort((a, b) {
+  //     int scoreA = keywords
+  //         .where((k) => fullTextContains(normalizeText(a.fullText), k))
+  //         .length;
+  //     int scoreB = keywords
+  //         .where((k) => fullTextContains(normalizeText(b.fullText), k))
+  //         .length;
+  //     return scoreB.compareTo(scoreA);
+  //   });
+
+  //   _resultatRecherche = List.of(results);
+  //   notifyListeners();
+  // }
+
+  // // Fonction helper pour gérer '+' et normalisation
+  // bool fullTextContains(String text, String keyword) {
+  //   if (keyword.startsWith('+')) {
+  //     return text.contains(keyword.substring(1));
+  //   } else {
+  //     return text.contains(keyword);
+  //   }
+  // }
+
+  // Recherche simple : tous les mots-clés doivent être présents
+  // void rechercheFormations(String query) {
+  //   _resultatRecherche.clear();
+  //   final keywords = query
+  //       .split('/')
+  //       .map((k) => normalizeText(k))
+  //       .where((k) => k.isNotEmpty)
+  //       .toList();
+
+  //   _resultatRecherche.addAll(
+  //     modules.where((m) {
+  //       final fullText = normalizeText(m.fullText);
+  //       return keywords.every((k) => fullText.contains(k));
+  //     }).toList(),
+  //   );
+  //   notifyListeners();
+  // }
+
+  int levenshtein(String s, String t) {
+    final m = s.length;
+    final n = t.length;
+
+    if (m == 0) return n;
+    if (n == 0) return m;
+
+    List<List<int>> dp = List.generate(
+      m + 1,
+      (_) => List<int>.filled(n + 1, 0, growable: false),
+      growable: false,
+    );
+
+    for (int i = 0; i <= m; i++) dp[i][0] = i;
+    for (int j = 0; j <= n; j++) dp[0][j] = j;
+
+    for (int i = 1; i <= m; i++) {
+      for (int j = 1; j <= n; j++) {
+        int cost = s[i - 1] == t[j - 1] ? 0 : 1;
+        dp[i][j] = [
+          dp[i - 1][j] + 1, // suppression
+          dp[i][j - 1] + 1, // insertion
+          dp[i - 1][j - 1] + cost, // substitution
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+
+    return dp[m][n];
+  }
+
+  // void rechercheFormations(String query, {int tolerance = 2}) {
+  //   _resultatRecherche.clear();
+
+  //   final keywords = query
+  //       .split('/')
+  //       .map((k) => normalizeText(k))
+  //       .where((k) => k.isNotEmpty)
+  //       .toList();
+
+  //   // 1️⃣ Recherche rapide avec contains()
+  //   _resultatRecherche.addAll(
+  //     modules.where((m) {
+  //       final fullText = normalizeText(m.fullText);
+  //       return keywords.every((kw) {
+  //         final kwWords = kw.split(' ');
+  //         return kwWords.every((kwWord) => fullText.contains(kwWord));
+  //       });
+  //     }).toList(),
+  //   );
+
+  //   // 2️⃣ Si aucun résultat, recherche avec Levenshtein
+  //   if (_resultatRecherche.isEmpty) {
+  //     _resultatRecherche.addAll(
+  //       modules.where((m) {
+  //         final fullText = normalizeText(m.fullText);
+  //         final words = fullText.split(' ');
+
+  //         return keywords.every((kw) {
+  //           final kwWords = kw.split(' ');
+  //           return kwWords.every(
+  //             (kwWord) => words.any((w) => levenshtein(kwWord, w) <= tolerance),
+  //           );
+  //         });
+  //       }).toList(),
+  //     );
+  //   }
+
+  //   notifyListeners();
+  // }
+
+  Future<void> rechercheFormations(String query, {int tolerance = 1}) async {
+    _resultatPrincipal.clear();
+    _resultatSecondaire.clear();
+    isSearching = true;
+
+    notifyListeners();
+    await Future.delayed(Duration.zero);
+
+    final keywords = query
+        .split('/')
+        .map((k) => normalizeText(k))
+        .where((k) => k.isNotEmpty)
+        .toList();
+
+    bool matchKeywords(String text, List<String> keywords) {
+      final fullText = normalizeText(text);
+      final words = fullText.split(' ');
+
+      // Recherche rapide avec contains
+      bool containsMatch = keywords.every((kw) {
+        final kwWords = kw.split(' ');
+        return kwWords.every((kwWord) => fullText.contains(kwWord));
+      });
+
+      if (containsMatch) return true;
+
+      // Si rien trouvé → fallback Levenshtein
+      return keywords.every((kw) {
+        final kwWords = kw.split(' ');
+        return kwWords.every(
+          (kwWord) => words.any((w) => levenshtein(kwWord, w) <= tolerance),
+        );
+      });
+    }
+
+    print(isSearching);
+    for (final m in modules) {
+      final inPrincipal = matchKeywords(m.fullTextPrincipal, keywords);
+      final inSecondaire =
+          !inPrincipal && matchKeywords(m.fullTextSecondaire, keywords);
+
+      if (inPrincipal) {
+        _resultatPrincipal.add(m);
+      } else if (inSecondaire) {
+        _resultatSecondaire.add(m);
+      }
+    }
+    isSearching = false;
+    notifyListeners();
+  }
+
+  // Normalisation
 }

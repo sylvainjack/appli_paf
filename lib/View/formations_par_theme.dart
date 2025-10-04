@@ -15,17 +15,16 @@ class FormationsParTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var data = Provider.of<DataProvider>(context);
+    var provider = Provider.of<DataProvider>(context);
     var screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 600;
 
-    // Largeur max de la boîte "ACCEDER AU PAF"
-    double pafBoxWidth = isMobile ? double.infinity : screenWidth / 3;
-
-    return Consumer<DataProvider>(
-      builder: (context, provider, child) {
-        return Scaffold(
-          extendBodyBehindAppBar: true, // AppBar transparente sur l'image
+    return PopScope(
+      canPop: false,
+      child: DefaultTabController(
+        length: 2, // nombre d'onglets
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -45,10 +44,9 @@ class FormationsParTheme extends StatelessWidget {
                     Navigator.pop(context);
                   },
                 ),
-
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.only(left: 20),
+                    margin: const EdgeInsets.only(left: 20),
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.only(left: 16),
                     child: Text(
@@ -71,17 +69,21 @@ class FormationsParTheme extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.menu, color: Colors.white),
-                  onPressed: () {
-                    // ouvrir menu
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
+            bottom: const TabBar(
+              isScrollable: true,
+              tabs: [
+                Tab(text: "Accès par thématiques de formation"),
+                Tab(text: "Accès à la liste formations"),
+              ],
+            ),
           ),
-
           body: Stack(
             children: [
-              // Image de fond fixe
+              // Image de fond
               Positioned.fill(
                 child: Image.asset(
                   "assets/images/fondjaune.jpg",
@@ -89,17 +91,15 @@ class FormationsParTheme extends StatelessWidget {
                 ),
               ),
 
-              // Contenu principal
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Contenu des onglets
+              TabBarView(
                 children: [
-                  // Zone gauche : cartes
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    padding: const EdgeInsets.all(16),
+                  // Onglet 1 : Dispositifs
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        double containerWidth = constraints.maxWidth;
+                        double containerWidth = constraints.maxWidth * 0.7;
                         double cardWidth = 260;
                         double cardHeight = 150;
 
@@ -108,8 +108,7 @@ class FormationsParTheme extends StatelessWidget {
                         if (crossAxisCount > 3) crossAxisCount = 3;
                         if (crossAxisCount < 1) crossAxisCount = 1;
 
-                        if (containerWidth < 500) {
-                          // Petit écran : ListView
+                        if (screenWidth < 500) {
                           return ListView.builder(
                             itemCount: provider.dispoByTheme.length,
                             itemBuilder: (context, index) {
@@ -135,46 +134,61 @@ class FormationsParTheme extends StatelessWidget {
                             },
                           );
                         } else {
-                          // GridView adaptatif
-                          return GridView.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  mainAxisSpacing: 16,
-                                  crossAxisSpacing: 16,
-                                  childAspectRatio: cardWidth / cardHeight,
-                                ),
-                            itemCount: provider.dispoByTheme.length,
-                            itemBuilder: (context, index) {
-                              final dispo = provider.dispoByTheme[index];
-                              final titreDispo = dispo.modules.isNotEmpty
-                                  ? dispo.modules[0].dispoTitre.toUpperCase()
-                                  : "DISPOSITIF SANS MODULE";
+                          return Center(
+                            child: SizedBox(
+                              width: containerWidth,
+                              child: GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: crossAxisCount,
+                                      mainAxisSpacing: 16,
+                                      crossAxisSpacing: 16,
+                                      childAspectRatio: cardWidth / cardHeight,
+                                    ),
+                                itemCount: provider.dispoByTheme.length,
+                                itemBuilder: (context, index) {
+                                  final dispo = provider.dispoByTheme[index];
+                                  final titreDispo = dispo.modules.isNotEmpty
+                                      ? dispo.modules[0].dispoTitre
+                                            .toUpperCase()
+                                      : "DISPOSITIF SANS MODULE";
 
-                              return DispositifBox(
-                                titre: titreDispo,
-                                nombreModules: dispo.modules.length,
-                                onTap: () {
-                                  print(
-                                    "Ouverture du dispositif : $titreDispo",
+                                  return DispositifBox(
+                                    titre: titreDispo,
+                                    nombreModules: dispo.modules.length,
+                                    onTap: () {
+                                      print(
+                                        "Ouverture du dispositif : $titreDispo",
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
+                              ),
+                            ),
                           );
                         }
                       },
                     ),
                   ),
 
-                  // Zone droite : vide ou pour autre contenu
-                  Expanded(child: Container()),
+                  // Onglet 2 : Modules (exemple de réutilisation de Grid/List)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ListView(
+                      children: provider.modules.map((module) {
+                        final session = provider.getSessionForModule(
+                          module.code,
+                        );
+                        return FormationBox(module: module, session: session);
+                      }).toList(),
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

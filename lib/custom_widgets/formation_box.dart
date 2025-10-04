@@ -197,13 +197,16 @@ class FormationBox extends StatelessWidget {
       onTap: () => _openPopup(context),
       child: Container(
         width: 300,
+        height: 180,
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 3),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           image: const DecorationImage(
-            image: AssetImage('assets/images/fond.jpg'), // ou NetworkImage(url)
+            image: AssetImage(
+              'assets/images/fondblanc2.jpg',
+            ), // ou NetworkImage(url)
             fit: BoxFit.cover, // adapte l'image à la taille du container
           ),
           boxShadow: const [
@@ -216,6 +219,7 @@ class FormationBox extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Ligne avec thème et icônes modalité + durée
             Row(
@@ -244,21 +248,25 @@ class FormationBox extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 8),
-
             // Titre du module
             Text(
               module.titre.length > 90
                   ? module.titre.substring(0, 90)
                   : module.titre,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
 
-            const Spacer(),
-
-            ElevatedButton(
-              onPressed: () => _openPopup(context),
-              child: const Text('Cela m\'intéresse'),
+            Container(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: Icon(
+                  Icons.touch_app, // icône doigt pour inciter au clic
+                  color: Colors.red[900], // couleur personnalisable
+                  size: 28, // taille adaptée à ton design
+                ),
+                tooltip: 'En savoir plus...', // texte au survol / accessibilité
+                onPressed: () => _openPopup(context),
+              ),
             ),
           ],
         ),
