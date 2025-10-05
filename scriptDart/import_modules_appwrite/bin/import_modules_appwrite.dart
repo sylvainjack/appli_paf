@@ -46,7 +46,7 @@ Future<void> main() async {
       ; // clé serveur
 
   final tablesDB = TablesDB(client);
-  final tableId = 'modules'; // ID de ta table module
+  final tableId = 'listemodules'; // ID de ta table module
 
   for (var module in listeModules) {
     try {
@@ -57,11 +57,11 @@ Future<void> main() async {
         data: module.toJson(),
       );
       print(
-        '✅ Ligne ${module.code} ajoutée : ${module.titre ?? 'sans titre'}',
+        '✅ Ligne ${module.code} ajoutée : ${module.moduleTitre ?? 'sans titre'}',
       );
     } catch (e) {
       print(
-        '❌ Erreur ligne ${module.code} (${module.titre ?? 'sans titre'}): $e',
+        '❌ Erreur ligne ${module.code} (${module.moduleTitre ?? 'sans titre'}): $e',
       );
     }
   }

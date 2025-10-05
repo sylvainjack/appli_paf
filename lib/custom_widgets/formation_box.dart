@@ -40,7 +40,7 @@ class FormationBox extends StatelessWidget {
                               Expanded(
                                 flex: 7,
                                 child: Text(
-                                  module.theme,
+                                  module.ofLibel,
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -80,7 +80,7 @@ class FormationBox extends StatelessWidget {
 
                           // Titre
                           Text(
-                            module.titre,
+                            module.moduleLibel,
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class FormationBox extends StatelessWidget {
                             'Objectifs',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Text(module.objectifs),
+                          Text(module.objectif),
 
                           if (hasSession) ...[
                             const SizedBox(height: 12),
@@ -227,7 +227,7 @@ class FormationBox extends StatelessWidget {
                 Expanded(
                   flex: 7,
                   child: Text(
-                    module.theme,
+                    module.ofLibel,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -250,9 +250,9 @@ class FormationBox extends StatelessWidget {
 
             // Titre du module
             Text(
-              module.titre.length > 90
-                  ? module.titre.substring(0, 90)
-                  : module.titre,
+              module.moduleLibel.length > 90
+                  ? module.moduleLibel.substring(0, 90)
+                  : module.moduleLibel,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
 

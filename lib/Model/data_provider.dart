@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 String endPoint = 'https://cloud.appwrite.io/v1';
 String projectId = '6441074a8af807749dd9';
-String modulesTable = 'modules';
+String modulesTable = 'listemodules';
 String sessionsTable = 'sessions';
 String databaseId = '68d93af100092904c136';
 
@@ -68,7 +68,28 @@ class DataProvider extends ChangeNotifier {
   double largeFont3 = 0;
   double largeFont4 = 0;
   double veryLargeFont = 0;
-
+  List<String> codeTransv = [
+    "REE_",
+    "NUME",
+    "VALR",
+    "IDIS",
+    "CAST",
+    "CIN_",
+    "DANS",
+    "DAR_",
+    "DESC",
+    "EAFC",
+    "EANA",
+    "EDOR",
+    "EMI_",
+    "EXER",
+    "GRH_",
+    "HYSE",
+    "PSC_",
+    "RECH",
+    "THE_",
+    "TUTE",
+  ];
   DataProvider() {
     startInitialization();
     // Lance la récupération des modules dès l'initialisation
@@ -82,8 +103,8 @@ class DataProvider extends ChangeNotifier {
       // Création liste des thèmes
       print("taille de la liste modules: ${_modules.length}");
       _modules.forEach((module) {
-        if (module.discipline == true) {
-          _themesDisc.add(module.theme);
+        if (!codeTransv.contains(module.ofCode)) {
+          _themesDisc.add(module.ofLibel);
         }
         // else {
         //   _themesTransv.add(module.theme);
@@ -187,6 +208,7 @@ class DataProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       _isInitialized = true;
+      print("Nombre de modules rapatriés : ${modules.length}");
       notifyListeners();
     }
   }
@@ -249,13 +271,13 @@ class DataProvider extends ChangeNotifier {
   }
 
   List<Module> getModulesByTheme(String theme) {
-    return _modules.where((m) => m.theme == theme).toList();
+    return _modules.where((m) => m.ofLibel == theme).toList();
   }
 
   void DispoByThemeList() {
     _dispoByTheme = _dispoList
         .where(
-          (d) => d.modules.isNotEmpty && d.modules[0].theme == _selectedTheme,
+          (d) => d.modules.isNotEmpty && d.modules[0].ofLibel == _selectedTheme,
         )
         .toList();
 
@@ -523,32 +545,24 @@ class DataProvider extends ChangeNotifier {
         .where((k) => k.isNotEmpty)
         .toList();
 
-    bool matchKeywords(String text, List<String> keywords) {
+    bool containsMatch(String text, List<String> keywords) {
       final fullText = normalizeText(text);
-      final words = fullText.split(' ');
-
-      // Recherche rapide avec contains
-      bool containsMatch = keywords.every((kw) {
-        final kwWords = kw.split(' ');
-        return kwWords.every((kwWord) => fullText.contains(kwWord));
-      });
-
-      if (containsMatch) return true;
-
-      // Si rien trouvé → fallback Levenshtein
-      return keywords.every((kw) {
-        final kwWords = kw.split(' ');
-        return kwWords.every(
-          (kwWord) => words.any((w) => levenshtein(kwWord, w) <= tolerance),
-        );
-      });
+      return keywords.every((kw) => fullText.contains(kw));
     }
 
-    print(isSearching);
+    bool fuzzyMatch(String text, List<String> keywords, int tolerance) {
+      final fullText = normalizeText(text);
+      final words = fullText.split(' ');
+      return keywords.every(
+        (kw) => words.any((w) => levenshtein(kw, w) <= tolerance),
+      );
+    }
+
+    // --- Étape 1 : recherche stricte ---
     for (final m in modules) {
-      final inPrincipal = matchKeywords(m.fullTextPrincipal, keywords);
+      final inPrincipal = containsMatch(m.fullTextPrincipal, keywords);
       final inSecondaire =
-          !inPrincipal && matchKeywords(m.fullTextSecondaire, keywords);
+          !inPrincipal && containsMatch(m.fullTextSecondaire, keywords);
 
       if (inPrincipal) {
         _resultatPrincipal.add(m);
@@ -556,9 +570,28 @@ class DataProvider extends ChangeNotifier {
         _resultatSecondaire.add(m);
       }
     }
+
+    // --- Étape 2 : si rien trouvé, fallback Levenshtein ---
+    if (_resultatPrincipal.isEmpty && _resultatSecondaire.isEmpty) {
+      for (final m in modules) {
+        final inPrincipal = fuzzyMatch(
+          m.fullTextPrincipal,
+          keywords,
+          tolerance,
+        );
+        final inSecondaire =
+            !inPrincipal &&
+            fuzzyMatch(m.fullTextSecondaire, keywords, tolerance);
+
+        if (inPrincipal) {
+          _resultatPrincipal.add(m);
+        } else if (inSecondaire) {
+          _resultatSecondaire.add(m);
+        }
+      }
+    }
+
     isSearching = false;
     notifyListeners();
   }
-
-  // Normalisation
 }
